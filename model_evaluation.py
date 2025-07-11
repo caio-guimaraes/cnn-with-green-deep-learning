@@ -8,18 +8,15 @@ from tensorflow.keras.models import load_model
 from tensorflow.keras.applications.resnet import preprocess_input  # ou outro preprocess
 
 # Caminho do modelo salvo
-model_path = 'vehicle_color_classifier_resnet50.h5'
+#model_path = 'vehicle_color_classifier_resnet50.h5'
+model_path = 'vehicle_color_classifier_resnet50_savedmodel'
 test_dir = 'data_test'
 
 # Carrega o modelo
 model = load_model(model_path)
 
 # Lista de classes (nomes das pastas dentro de data_test)
-# with open("class_names.json") as f:
-#     class_names = json.load(f)
-
-class_names = sorted(os.listdir('data'))
-print(class_names)
+class_names = sorted(os.listdir(test_dir))
 
 y_true = []
 y_pred = []

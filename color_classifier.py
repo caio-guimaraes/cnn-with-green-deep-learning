@@ -66,5 +66,5 @@ model.compile(optimizer=Adam(learning_rate=1e-4),
 model.fit(train_ds, validation_data=val_ds, epochs=10)
 
 # Salva o modelo
-model.save("vehicle_color_classifier_resnet50.h5")
-print("✅ Modelo salvo como vehicle_color_classifier_resnet50.h5")
+model.save("vehicle_color_classifier_resnet50_savedmodel", save_format="tf")
+print("✅ Modelo salvo como vehicle_color_classifier_resnet50_savedmodel")

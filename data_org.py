@@ -54,5 +54,3 @@ for vehicle in root.findall('.//vehicle'):
 
     shutil.copy2(imagem_origem, imagem_destino)
     print(f'Copiado: {placa} → {color}/{placa}.jpg')
-
-

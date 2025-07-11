@@ -10,7 +10,6 @@ import os
 
 
 def main():
-
     # Diretório das imagens (subpastas por cor)
     data_dir = 'data'
     img_size = (224, 224)

@@ -1,13 +1,13 @@
 import os
 import torch
 import torch.nn as nn
+import matplotlib.pyplot as plt
+import time
 from torchvision import models, transforms
 from PIL import Image
-import numpy as np
 from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay, classification_report
-import matplotlib.pyplot as plt
+from sklearn.preprocessing import LabelEncoder
 from tqdm import tqdm
-import time
 
 # Caminhos
 model_path = 'vehicle_color_classifier_resnet50.pth'
@@ -73,10 +73,27 @@ for label, img_path in tqdm(samples, desc="Validando", unit="img"):
 elapsed = time.time() - start_time
 print(f"\n✅ Classificação concluída em {elapsed:.2f} s para {len(samples)} imagens.")
 
+# Encoding
+le = LabelEncoder()
+le.fit(class_names)
+y_true_enc = le.transform(y_true)
+y_pred_enc = le.transform(y_pred)
+
 # Matriz de confusão
-cm = confusion_matrix(y_true, y_pred, labels=class_names)
+cm = confusion_matrix(y_true_enc, y_pred_enc, labels=range(len(class_names)))
 disp = ConfusionMatrixDisplay(confusion_matrix=cm, display_labels=class_names)
 disp.plot(cmap='Blues', xticks_rotation=45)
 plt.title("Matriz de Confusão")
 plt.tight_layout()
 plt.show()
+
+# Classification report
+report = classification_report(
+    y_true_enc,
+    y_pred_enc,
+    labels=range(len(class_names)),
+    target_names=class_names,
+    zero_division=0
+)
+print("\n📊 Classification Report:\n")
+print(report)

@@ -1,5 +1,5 @@
 # CNN with Green Geep Learning
-Implementação de uma CNN pré-treinada (**VGG16**) para a classificação de imagens de carros
+Implementação de uma CNN pré-treinada (**ResNet50**) para a classificação de imagens de carros
 
 Após sua implementação foi criada uma nova versão utilizando técnicas de **Green Deep Learning**: Pruning; Knowledge destilation;
 

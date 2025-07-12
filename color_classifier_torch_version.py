@@ -16,7 +16,7 @@ def main():
     batch_size = 32
     seed = 42
 
-    num_epochs = 10
+    num_epochs = 30
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     print("Usando dispositivo:", device)
@@ -63,7 +63,7 @@ def main():
     print("Classes:", class_names)
 
     # Carrega a ResNet50 pré-treinada
-    model = models.resnet50(weights='IMAGENET1K_V1')
+    model = models.resnet50(weights='IMAGENET1K_V2')
     for param in model.parameters():
         param.requires_grad = False
 
@@ -83,6 +83,7 @@ def main():
 
     # Treinamento
     print("\nIniciando treinamento...\n")
+    train_start = time.time()
     for epoch in range(num_epochs):
         print(f"Epoch {epoch+1}/{num_epochs}")
         print('-' * 30)
@@ -114,20 +115,15 @@ def main():
 
                 running_loss += loss.item() * inputs.size(0)
                 running_corrects += torch.sum(preds == labels.data)
-
-            epoch_loss = running_loss / len(dataloaders[phase].dataset)
-            epoch_acc = running_corrects.double() / len(dataloaders[phase].dataset)
-            
-            elapsed = time.time() - epoch_start
-
-            print(f"{phase} Loss: {epoch_loss:.4f} Acc: {epoch_acc:.4f}")
             
         epoch_loss = running_loss / len(dataloaders[phase].dataset)
         epoch_acc = running_corrects.double() / len(dataloaders[phase].dataset)
+        elapsed = time.time() - epoch_start
 
         print(f"{phase} Loss: {epoch_loss:.4f} Acc: {epoch_acc:.4f} - Tempo: {elapsed:.2f}s")
 
-    print("✅ Treinamento concluído.")
+    train_elapsed = time.time() - train_start
+    print(f"✅ Treinamento concluído em {train_elapsed:.2f}s")
 
     # Salva o modelo
     torch.save(model.state_dict(), "vehicle_color_classifier_resnet50.pth")

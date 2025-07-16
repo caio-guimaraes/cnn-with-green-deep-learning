@@ -12,6 +12,8 @@ from torchwnn.classifiers import Wisard
 from torchwnn.encoding import Thermometer
 import time
 import os
+from sklearn.decomposition import PCA
+
 
 def main():
     # Caminhos
@@ -42,10 +44,9 @@ def main():
     model.eval()
 
     # Extrator de features (sem o otimizador e loss)
-    feature_extractor = model
-    # feature_extractor = nn.Sequential(*list(model.children())[:-1])
-    # feature_extractor.to(device)
-    # feature_extractor.eval()
+    feature_extractor = nn.Sequential(*list(model.children())[:-1])
+    feature_extractor.to(device)
+    feature_extractor.eval()
 
     # Dataset
     transform = transforms.Compose([
@@ -62,7 +63,7 @@ def main():
     train_loader = DataLoader(train_dataset, batch_size=32, shuffle=False, num_workers=0)
     test_loader  = DataLoader(test_dataset, batch_size=32, shuffle=False, num_workers=0)
 
-    #  Extrair features + termômetro
+    #  Extrair features
     def extract_features(dataloader):
         all_features = []
         all_labels = []
@@ -79,12 +80,7 @@ def main():
         X = torch.cat(all_features, dim=0) 
         y = torch.tensor(all_labels)
 
-        # Codificação com Termômetro
-        bits_encoding = 20
-        encoding = Thermometer(bits_encoding).fit(X)
-        X_bin = encoding.binarize(X).flatten(start_dim=1)
-
-        return X_bin, y
+        return X, y
 
     print("🔍 Extraindo features de treino...")
     X_train, y_train = extract_features(train_loader)
@@ -94,16 +90,28 @@ def main():
     X_test, y_test = extract_features(test_loader)
     print("✅ Teste:", X_test.shape)
 
+    # Reduz a dimensão para 32
+    pca = PCA(n_components=32)
+    X_train_pca = pca.fit_transform(X_train)
+    X_test_pca  = pca.transform(X_test)
+
+    # Codificação com Termômetro
+    bits_encoding = 20
+    encoding = Thermometer(bits_encoding).fit(X_train_pca)
+    X_train_bin = encoding.binarize(X_train_pca).flatten(start_dim=1)
+    encoding = Thermometer(bits_encoding).fit(X_test_pca)
+    X_test_bin = encoding.binarize(X_test_pca).flatten(start_dim=1)
+
     # WiSARD
-    entry_size = X_train.shape[1]
-    tuple_size = 8
+    entry_size = X_train_bin.shape[1]
+    tuple_size = 16
 
     with torch.no_grad():
         wisard = Wisard(entry_size, num_classes, tuple_size, bleaching=True)
-        wisard.fit(X_train, y_train)
+        wisard.fit(X_train_bin, y_train)
 
     # Avaliação
-    y_pred = wisard.predict(X_test)
+    y_pred = wisard.predict(X_test_bin)
 
     # Classification report
     print("\n📊 Classification Report:\n")
